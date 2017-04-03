@@ -1,0 +1,32 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Resources:
+  ApiLambda:
+    Properties:
+      CodeUri: s3://cali-lambdas/f1e84b3e3230fcd318c3034f3264dab7
+      Environment:
+        Variables:
+          EVENTS_TABLE_NAME:
+            Ref: EventsTable
+          REGION:
+            Ref: AWS::Region
+      Events:
+        ProxyApiGreedy:
+          Properties:
+            Method: ANY
+            Path: /api/{proxy+}
+          Type: Api
+      Handler: src/lambdas/api/lambda.handler
+      Policies:
+      - AWSLambdaRole
+      - AWSLambdaBasicExecutionRole
+      - AmazonDynamoDBFullAccess
+      Runtime: nodejs4.3
+      Timeout: 10
+    Type: AWS::Serverless::Function
+  EventsTable:
+    Properties:
+      PrimaryKey:
+        Name: id
+        Type: String
+    Type: AWS::Serverless::SimpleTable
+Transform: AWS::Serverless-2016-10-31

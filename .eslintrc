@@ -1,0 +1,37 @@
+{
+    "extends": "airbnb-base",
+    "plugins": [
+      "mocha",
+      "react"
+    ],
+    "env": {
+        "browser": true,
+        "node": true,
+        "mocha": true,
+        "es6": true
+    },
+    "globals": {
+      "__DEV__": false,
+    },
+    "rules": {
+      "import/no-extraneous-dependencies": [
+        "error", {
+          "devDependencies": true,
+          "optionalDependencies": false,
+          "peerDependencies": false
+        }
+      ],
+      "react/jsx-uses-react": "error",
+      "react/jsx-uses-vars": "error",
+      "global-require": ["off"],
+      "arrow-parens": ["error", "always"],
+      "no-param-reassign": ["error", { "props": false }],
+      "class-methods-use-this": ["off"],
+      "no-underscore-dangle": ["off"]
+    },
+    "parserOptions": {
+        "ecmaFeatures": {
+            "jsx": true
+        }
+    },
+}

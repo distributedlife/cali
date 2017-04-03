@@ -1,0 +1,42 @@
+{
+  "name": "cali",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "lint": "eslint **/*.js",
+    "devices": "xcrun simctl list devices",
+    "simulators": "xcrun simctl list devices",
+    "deploy": "cd ios && fastlane beta",
+    "start": "react-native run-ios --simulator 'iPad 2'",
+    "android": "react-native run-android",
+    "logs": "react-native log-ios",
+    "test": "jest"
+  },
+  "dependencies": {
+    "axios": "^0.16.0",
+    "moment": "^2.18.1",
+    "react": "~15.4.1",
+    "react-native": "0.42.3",
+    "react-native-prompt": "^1.0.0",
+    "react-native-root-toast": "^1.0.5",
+    "react-redux": "^5.0.3",
+    "redux": "^3.6.0",
+    "redux-storage": "^4.1.2",
+    "redux-storage-engine-reactnativeasyncstorage": "^1.0.5",
+    "redux-thunk": "^2.2.0"
+  },
+  "devDependencies": {
+    "babel-jest": "19.0.0",
+    "babel-preset-react-native": "1.9.1",
+    "eslint": "^3.19.0",
+    "eslint-config-airbnb-base": "^11.1.2",
+    "eslint-plugin-import": "^2.2.0",
+    "eslint-plugin-mocha": "^4.9.0",
+    "eslint-plugin-react": "^6.10.3",
+    "jest": "19.0.2",
+    "react-test-renderer": "~15.4.1"
+  },
+  "jest": {
+    "preset": "react-native"
+  }
+}
