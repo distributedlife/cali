@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 
 const addEvent = require('./src/add-event');
 const getEvents = require('./src/get-events');
+const deleteEvent = require('./src/delete-event');
 
 const app = express();
 
@@ -30,7 +31,13 @@ app.post('/api/events', (req, res) => (
 ));
 
 app.get('/api/events', (req, res) => (
-  getEvents(deExpressYourself(req))
+  deleteEvent(deExpressYourself(req))
+    .then((data) => res.json(data))
+    .catch((err) => res.sendStatus(getCode(err)))
+));
+
+app.delete('/api/events/:id', (req, res) => (
+  deleteEvent(deExpressYourself(req).params.id)
     .then((data) => res.json(data))
     .catch((err) => res.sendStatus(getCode(err)))
 ));
