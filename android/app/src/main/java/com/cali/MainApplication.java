@@ -1,4 +1,4 @@
-package com.cali;
+package com.distributedlife.cali;
 
 import android.app.Application;
 
