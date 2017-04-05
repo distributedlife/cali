@@ -31,14 +31,14 @@ app.post('/api/events', (req, res) => (
 ));
 
 app.get('/api/events', (req, res) => (
-  deleteEvent(deExpressYourself(req))
+  getEvents()
     .then((data) => res.json(data))
     .catch((err) => res.sendStatus(getCode(err)))
 ));
 
-app.delete('/api/events/:id', (req, res) => (
-  deleteEvent(deExpressYourself(req).params.id)
-    .then((data) => res.json(data))
+app.delete('/api/event/:id', (req, res) => (
+  deleteEvent(req.params.id)
+    .then(() => res.sendStatus(200))
     .catch((err) => res.sendStatus(getCode(err)))
 ));
 

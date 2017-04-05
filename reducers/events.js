@@ -1,4 +1,4 @@
-import { EVENT_ADDED, EVENTS_RESET_TO_SERVER } from '../actions';
+import { EVENT_ADDED, EVENTS_RESET_TO_SERVER, EVENT_DELETED } from '../actions';
 
 export default (state = {}, action) => {
   switch (action.type) {
@@ -13,6 +13,12 @@ export default (state = {}, action) => {
           id: action.event.id,
         },
       };
+    case EVENT_DELETED:
+      Object.keys(state).filter((date) => state[date].id === action.id).forEach((date) => {
+        delete state[date];
+      });
+
+      return state;
     default:
       return state;
   }

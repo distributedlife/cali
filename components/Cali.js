@@ -10,7 +10,7 @@ import moment from 'moment';
 import Toast from 'react-native-root-toast';
 import Prompt from './Prompt';
 import SquareView from './Square';
-import { addEvent } from '../actions/events';
+import { addEvent, deleteEvent } from '../actions/events';
 
 const square = {
   flex: 1,
@@ -209,9 +209,9 @@ class CaliSquareView extends React.Component {
           }}
           onDelete={() => {
             this.setState({ popupVisible: false });
-            dispatchDeleteEvent({
-              id: getEventForDay(day, events) && getEventForDay(day, events).id,
-            });
+            dispatchDeleteEvent(
+              getEventForDay(day, events) && getEventForDay(day, events).id,
+            );
           }}
           onSubmit={(value) => {
             this.setState({ popupVisible: false });
@@ -231,6 +231,7 @@ const CaliSquare = connect((state) => ({
   events: state.events,
 }), {
   dispatchAddEvent: addEvent,
+  dispatchDeleteEvent: deleteEvent,
 })(CaliSquareView);
 
 
