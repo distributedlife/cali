@@ -3,7 +3,7 @@ import {
   Modal,
   Text,
   TextInput,
-  TouchableWithoutFeedback,
+  TouchableHighlight,
   View,
   StyleSheet,
 } from 'react-native';
@@ -31,11 +31,13 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   dialogTitle: {
+    flexDirection: 'row',
     borderBottomWidth: 1,
     paddingVertical: 10,
     paddingHorizontal: 15,
   },
   dialogTitleText: {
+    flex: 3,
     fontSize: 18,
     fontWeight: '600',
   },
@@ -58,8 +60,16 @@ const styles = StyleSheet.create({
     fontSize: 18,
     textAlign: 'center',
     color: '#006dbf',
-  },
+  }
 });
+
+const deleteButtonTextStyle = {
+  color: 'red'
+}
+
+const cancelButtonTextStyle = {
+  color: 'black'
+}
 
 export default class Prompt extends Component {
   constructor(props) {
@@ -118,9 +128,7 @@ export default class Prompt extends Component {
       submitButtonStyle,
       submitButtonTextStyle,
       cancelButtonStyle,
-      cancelButtonTextStyle,
       deleteButtonStyle,
-      deleteButtonTextStyle,
       inputStyle,
     } = this.props;
 
@@ -132,13 +140,11 @@ export default class Prompt extends Component {
             <Text style={[styles.dialogTitleText, titleStyle]}>
               { title }
             </Text>
-            <TouchableWithoutFeedback onPress={this._onCancelPress.bind(this)}>
-              <View style={[styles.dialogAction, buttonStyle, cancelButtonStyle]}>
-                <Text style={[styles.dialogActionText, buttonTextStyle, cancelButtonTextStyle]}>
-                  X
-                </Text>
-              </View>
-            </TouchableWithoutFeedback>
+            <TouchableHighlight onPress={this._onCancelPress.bind(this)}>
+              <Text style={[styles.dialogActionText, buttonTextStyle, cancelButtonTextStyle]}>
+                X
+              </Text>
+            </TouchableHighlight>
           </View>
           <View style={styles.dialogBody}>
             <TextInput
@@ -151,20 +157,22 @@ export default class Prompt extends Component {
               {...this.props.textInputProps} />
           </View>
           <View style={[styles.dialogFooter, { borderColor }]}>
-            <TouchableWithoutFeedback onPress={this._onDeletePress.bind(this)}>
-              <View style={[styles.dialogAction, buttonStyle, deleteButtonStyle]}>
-                <Text style={[styles.dialogActionText, buttonTextStyle, deleteButtonTextStyle]}>
-                  Delete
-                </Text>
-              </View>
-            </TouchableWithoutFeedback>
-            <TouchableWithoutFeedback onPress={this._onSubmitPress.bind(this)}>
-              <View style={[styles.dialogAction, buttonStyle, submitButtonStyle]}>
-                <Text style={[styles.dialogActionText, buttonTextStyle, submitButtonTextStyle]}>
-                  OK
-                </Text>
-              </View>
-            </TouchableWithoutFeedback>
+            <TouchableHighlight
+              style={[styles.dialogAction, buttonStyle, deleteButtonStyle]}
+              onPress={this._onDeletePress.bind(this)}
+            >
+              <Text style={[styles.dialogActionText, buttonTextStyle, deleteButtonTextStyle]}>
+                Delete
+              </Text>
+            </TouchableHighlight>
+            <TouchableHighlight
+              onPress={this._onSubmitPress.bind(this)}
+              style={[styles.dialogAction, buttonStyle, submitButtonStyle]}
+            >
+              <Text style={[styles.dialogActionText, buttonTextStyle, submitButtonTextStyle]}>
+                OK
+              </Text>
+            </TouchableHighlight>
           </View>
         </View>
       </View>
