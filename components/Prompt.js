@@ -30,6 +30,7 @@ class EventType extends React.Component {
       <SegmentedControlTab
         borderRadius={0}
         values={types}
+        tabStyle={{ marginHorizontal: 2, marginTop: 2 }}
         selectedIndex={this.state.selectedIndex}
         onTabPress={this.handleIndexChange.bind(this)}
       />
