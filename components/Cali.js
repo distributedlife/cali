@@ -179,9 +179,11 @@ class CaliSquareView extends React.Component {
   constructor(props) {
     super(props);
 
+    const eventForDay = getEventForDay(props.day, props.events);
+
     this.state = {
       popupVisible: false,
-      type: getEventForDay(props.day, props.events) && getEventForDay(props.day, props.events).type,
+      type: (eventForDay && eventForDay.type) || 'busy',
     };
   }
   render() {
