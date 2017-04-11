@@ -42,13 +42,9 @@ const styles = {
     ...square,
     backgroundColor: colours.busy,
   },
-  'public-holiday': {
+  leave: {
     ...square,
     backgroundColor: colours.publicHoliday,
-  },
-  'annual-leave': {
-    ...square,
-    backgroundColor: colours.annualLeave,
   },
   weekend: {
     ...square,
@@ -183,7 +179,10 @@ class CaliSquareView extends React.Component {
   constructor(props) {
     super(props);
 
-    this.state = { popupVisible: false };
+    this.state = {
+      popupVisible: false,
+      type: getEventForDay(props.day, props.events) && getEventForDay(props.day, props.events).type,
+    };
   }
   render() {
     const { day, startOfMonth, dispatchAddEvent, events, dispatchDeleteEvent } = this.props;
@@ -201,6 +200,10 @@ class CaliSquareView extends React.Component {
         </TouchableWithoutFeedback>
         <Prompt
           title={day.format('DD MMMM YYYY')}
+          type={this.state.type}
+          onTypeChange={(newType) => {
+            this.setState({ type: newType });
+          }}
           placeholder="..."
           defaultValue={getEventForDay(day, events) && getEventForDay(day, events).what}
           visible={ this.state.popupVisible }
@@ -217,7 +220,7 @@ class CaliSquareView extends React.Component {
             this.setState({ popupVisible: false });
             dispatchAddEvent({
               date: day.format('DD/MM/YYYY'),
-              type: 'busy',
+              type: this.state.type,
               what: value,
             });
           }}

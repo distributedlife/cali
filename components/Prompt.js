@@ -7,6 +7,35 @@ import {
   View,
   StyleSheet,
 } from 'react-native';
+import SegmentedControlTab from 'react-native-segmented-control-tab';
+
+const types = ['Busy', 'Leave', 'Breaky', 'Lunch', 'Dinner'];
+class EventType extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      selectedIndex: types.map((t) => t.toLowerCase()).indexOf(props.type.toLowerCase()),
+    };
+  }
+
+  handleIndexChange(index) {
+    this.setState({ selectedIndex: index });
+
+    this.props.onTypeChange(types[index].toLowerCase());
+  }
+
+  render() {
+    return (
+      <SegmentedControlTab
+        borderRadius={0}
+        values={types}
+        selectedIndex={this.state.selectedIndex}
+        onTabPress={this.handleIndexChange.bind(this)}
+      />
+    );
+  }
+}
 
 const styles = StyleSheet.create({
   dialog: {
@@ -60,16 +89,16 @@ const styles = StyleSheet.create({
     fontSize: 18,
     textAlign: 'center',
     color: '#006dbf',
-  }
+  },
 });
 
 const deleteButtonTextStyle = {
-  color: 'red'
-}
+  color: 'red',
+};
 
 const cancelButtonTextStyle = {
-  color: 'black'
-}
+  color: 'black',
+};
 
 export default class Prompt extends Component {
   constructor(props) {
@@ -103,6 +132,10 @@ export default class Prompt extends Component {
     this.props.onSubmit(value);
   }
 
+  _onTypeChange(newtype) {
+    this.props.onTypeChange(newtype);
+  }
+
   _onCancelPress() {
     this.props.onCancel();
   }
@@ -118,6 +151,7 @@ export default class Prompt extends Component {
   _renderDialog() {
     const {
       title,
+      type,
       placeholder,
       defaultValue,
       borderColor,
@@ -145,6 +179,9 @@ export default class Prompt extends Component {
                 X
               </Text>
             </TouchableHighlight>
+          </View>
+          <View>
+            <EventType type={type} onTypeChange={this._onTypeChange.bind(this)} />
           </View>
           <View style={styles.dialogBody}>
             <TextInput
