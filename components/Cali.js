@@ -23,9 +23,7 @@ const square = {
 
 const colours = {
   busy: 'orange',
-  publicHoliday: 'green',
-  annualLeave: 'green',
-  weekend: 'green',
+  leave: 'green',
   optional: 'purple',
   birthday: 'red',
 };
@@ -44,11 +42,13 @@ const styles = {
   },
   leave: {
     ...square,
-    backgroundColor: colours.publicHoliday,
+    borderColor: colours.leave,
+    borderWidth: 2,
   },
   weekend: {
     ...square,
-    backgroundColor: colours.weekend,
+    borderColor: colours.leave,
+    borderWidth: 2,
   },
   birthday: {
     ...square,
@@ -78,20 +78,7 @@ const row = {
 const DaysInWeek = 7;
 const Weekend = [6, 7];
 
-const today = moment().startOf('day');
-const startOfThisMonth = today.clone().startOf('month');
-const dayOfMonth = today.date();
-const daysInMonth = today.daysInMonth();
-const dayOfWeek = today.isoWeekday();
-const daysLeft = daysInMonth - dayOfMonth;
-
-const daysInCurrentMonth = Array(daysLeft).fill(0).map((x, i) => today.clone().add(i + 1, 'days'));
-
-Array(dayOfWeek).fill(0).forEach((x, i) => daysInCurrentMonth.unshift(
-  today.clone().subtract(i, 'days'),
-));
-
-const getType = (day, startOfMonth, events) => {
+const getType = (today, day, startOfMonth, events) => {
   if (day.isBefore(today)) {
     return 'past';
   }
@@ -110,7 +97,7 @@ const getType = (day, startOfMonth, events) => {
     return 'nothing-planned';
   }
 
-  return event.type;
+  return event.busy;
 };
 
 const getTextStyle = (type) => {
@@ -135,13 +122,13 @@ const getStyle = (type) => {
     case 'nothing-planned':
       return square;
     default:
-      return styles[type];
+      return styles.busy;
   }
 };
 
 const doNothing = () => undefined;
 const getEventForDay = (day, events) => events[day.format('DD/MM/YYYY')];
-const showMessageForDay = (day, events) => {
+const showMessageForDay = (today, day, events, startOfThisMonth) => {
   if (day.isBefore(today)) {
     return doNothing;
   }
@@ -164,12 +151,9 @@ const screen = {
   alignItems: 'center',
 };
 
-const thisMonth = today.month();
-const remainingMonthsInYear = Array(11 - thisMonth).fill(0).map((x, i) => today.clone().add(i + 1, 'months').startOf('month'));
-
 const MonthHeader = ({ month }) => (
   <View>
-    <Text style={{ textAlign: 'center' }}>{month.format('MMMM - YYYY')}</Text>
+    <Text style={{ textAlign: 'center' }}>{month}</Text>
   </View>
 );
 
@@ -186,18 +170,25 @@ class CaliSquareView extends React.Component {
       type: (eventForDay && eventForDay.type) || 'busy',
     };
   }
+
   render() {
-    const { day, startOfMonth, dispatchAddEvent, events, dispatchDeleteEvent } = this.props;
+    const {
+      today, day, startOfMonth, dispatchAddEvent, events, dispatchDeleteEvent, startOfThisMonth,
+    } = this.props;
 
     return (
-      <SquareView style={getStyle(getType(day, startOfMonth, events))}>
+      <SquareView style={getStyle(getType(today, day, startOfMonth, events))}>
         <TouchableWithoutFeedback
-          onPress={showMessageForDay(day, events)}
+          onPress={showMessageForDay(today, day, events, startOfThisMonth)}
           onLongPress={() => { this.setState({ popupVisible: true }); }}
           hitSlop={expanded}
         >
           <View>
-            <Text style={getTextStyle(getType(day, startOfMonth, events))}>{day.date()}</Text>
+            <Text
+              style={getTextStyle(getType(today, day, startOfMonth, events))}
+            >
+              {moment(day).date()}
+            </Text>
           </View>
         </TouchableWithoutFeedback>
         <Prompt
@@ -233,6 +224,8 @@ class CaliSquareView extends React.Component {
 }
 
 const CaliSquare = connect((state) => ({
+  today: state.time.today,
+  startOfThisMonth: state.time.startOfThisMonth,
   events: state.events,
 }), {
   dispatchAddEvent: addEvent,
@@ -260,7 +253,7 @@ const Days = ({ days, startOfMonth }) => {
         <View style={{ ...row, height }} key={i}>
         {
           daysInRow.map((day) => (
-            <CaliSquare key={day.date()} day={day} startOfMonth={startOfMonth} />
+            <CaliSquare key={moment(day).date()} day={moment(day)} startOfMonth={startOfMonth} />
           ))
         }
         </View>
@@ -288,19 +281,23 @@ const FutureMonth = ({ month }) => {
 
   return (
     <View>
-      <MonthHeader month={month} />
+      <MonthHeader month={month.format('MMMM - YYYY')} />
       <Days days={monthDays} startOfMonth={month} />
     </View>
   );
 };
 
-const Cali = () => (
+const Cali = ({ startOfThisMonth, daysInCurrentMonth, remainingMonthsInYear }) => (
   <View style={screen}>
     <CurrentMonth month={startOfThisMonth} days={daysInCurrentMonth}/>
     {
-      remainingMonthsInYear.map((month) => (<FutureMonth key={month} month={month} />))
+      remainingMonthsInYear.map((month) => (<FutureMonth key={month} month={moment(month)} />))
     }
   </View>
 );
 
-export default Cali;
+export default connect((state) => ({
+  startOfThisMonth: state.time.startOfThisMonth,
+  daysInCurrentMonth: state.time.daysInCurrentMonth,
+  remainingMonthsInYear: state.time.remainingMonthsInYear,
+}))(Cali);

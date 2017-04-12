@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import SegmentedControlTab from 'react-native-segmented-control-tab';
 
-const types = ['Busy', 'Leave', 'Breaky', 'Lunch', 'Dinner'];
+const types = ['Busy', 'Leave', 'Morning', 'Lunch', 'Evening'];
 class EventType extends React.Component {
   constructor(props) {
     super(props);
@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
   },
   dialogContent: {
     elevation: 5,
-    marginTop: 150,
+    marginTop: 0,
     width: 300,
     backgroundColor: 'white',
     borderRadius: 5,
