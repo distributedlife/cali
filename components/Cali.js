@@ -5,6 +5,7 @@ import {
   View,
   TouchableWithoutFeedback,
   Dimensions,
+  Image,
 } from 'react-native';
 import moment from 'moment';
 import Toast from 'react-native-root-toast';
@@ -24,7 +25,6 @@ const square = {
 const colours = {
   busy: 'orange',
   leave: 'green',
-  optional: 'purple',
   birthday: 'red',
 };
 
@@ -36,36 +36,37 @@ const styles = {
     ...square,
     borderWidth: 0,
   },
+  nothing: {
+  },
   busy: {
-    ...square,
     backgroundColor: colours.busy,
   },
   leave: {
-    ...square,
     borderColor: colours.leave,
     borderWidth: 2,
   },
   weekend: {
-    ...square,
     borderColor: colours.leave,
     borderWidth: 2,
   },
-  birthday: {
-    ...square,
-    backgroundColor: colours.birthday,
+  morning: {
+    backgroundColor: colours.busy,
   },
-  optional: {
-    ...square,
-    backgroundColor: colours.optional,
+  lunch: {
+    backgroundColor: colours.busy,
   },
+  night: {
+    backgroundColor: colours.busy,
+  },
+  birthday: {},
 };
 
 const textStyles = {
-  past: {
-    color: 'white',
-  },
-  future: {
+  regular: {
     color: 'black',
+    marginVertical: 4,
+    height: 20,
+    textAlign: 'center',
   },
 };
 
@@ -78,7 +79,7 @@ const row = {
 const DaysInWeek = 7;
 const Weekend = [6, 7];
 
-const getType = (today, day, startOfMonth, events) => {
+const getBaseTypes = (today, day, startOfMonth, events) => {
   if (day.isBefore(today)) {
     return 'past';
   }
@@ -89,41 +90,11 @@ const getType = (today, day, startOfMonth, events) => {
   const dayAsDataFormat = day.format('DD/MM/YYYY');
   const event = events[dayAsDataFormat];
 
-  if (!event) {
-    if (Weekend.includes(day.isoWeekday())) {
-      return 'weekend';
-    }
-
-    return 'nothing-planned';
+  if (Weekend.includes(day.isoWeekday())) {
+    return 'weekend';
   }
 
-  return event.busy;
-};
-
-const getTextStyle = (type) => {
-  switch (type) {
-    case 'past':
-      return textStyles.past;
-    case 'padding':
-      return textStyles.past;
-    default:
-      return textStyles.future;
-  }
-};
-
-const getStyle = (type) => {
-  switch (type) {
-    case 'past':
-      return styles.past;
-    case 'padding':
-      return styles.skip;
-    case 'weekend':
-      return styles.weekend;
-    case 'nothing-planned':
-      return square;
-    default:
-      return styles.busy;
-  }
+  return event ? 'busy' : 'nothing';
 };
 
 const doNothing = () => undefined;
@@ -153,8 +124,36 @@ const screen = {
 
 const MonthHeader = ({ month }) => (
   <View>
-    <Text style={{ textAlign: 'center' }}>{month}</Text>
+    <Text style={{ textAlign: 'center' }}>{month.format('MMMM - YYYY')}</Text>
   </View>
+);
+
+const morning = require('../assets/morning.png');
+const noon = require('../assets/noon.png');
+const night = require('../assets/night.png');
+const birthday = require('../assets/birthday.png');
+
+
+const Morning = ({ visible }) => (
+  <Text style={{ fontSize: 8 }}>
+    {visible && <Image style={{ width: 8, height: 8 }} source={morning} /> }
+  </Text>
+);
+
+const Lunch = ({ visible }) => (
+  <Text style={{ fontSize: 8 }}>
+    {visible && <Image style={{ width: 8, height: 8 }} source={noon} /> }
+  </Text>
+);
+const Birthday = ({ visible }) => (
+  <Text style={{ fontSize: 8 }}>
+    {visible && <Image style={{ width: 8, height: 8 }} source={birthday} /> }
+  </Text>
+);
+const Night = ({ visible }) => (
+  <Text style={{ fontSize: 8 }}>
+    {visible && <Image style={{ width: 8, height: 8 }} source={night} /> }
+  </Text>
 );
 
 const expanded = { top: 10, bottom: 10, left: 10, right: 10 };
@@ -163,12 +162,20 @@ class CaliSquareView extends React.Component {
   constructor(props) {
     super(props);
 
-    const eventForDay = getEventForDay(props.day, props.events);
+    const eventForDay = getEventForDay(props.day, props.events) || {};
 
     this.state = {
       popupVisible: false,
-      type: (eventForDay && eventForDay.type) || 'busy',
+      types: eventForDay.types || [],
     };
+  }
+
+  show() {
+    this.setState({ popupVisible: true });
+  }
+
+  hide() {
+    this.setState({ popupVisible: false });
   }
 
   render() {
@@ -176,44 +183,55 @@ class CaliSquareView extends React.Component {
       today, day, startOfMonth, dispatchAddEvent, events, dispatchDeleteEvent, startOfThisMonth,
     } = this.props;
 
+    const baseType = getBaseTypes(today, day, startOfMonth, events);
+
+    if (baseType === 'past') {
+      return (<SquareView style={styles.past} />);
+    }
+    if (baseType === 'padding') {
+      return (<SquareView style={styles.skip} />);
+    }
+
+    const eventForDay = getEventForDay(day, events) || {};
+    eventForDay.types = eventForDay.types || [];
+    const dayStyles = this.state.types.concat(baseType).map((t) => styles[t]);
+
     return (
-      <SquareView style={getStyle(getType(today, day, startOfMonth, events))}>
+      <SquareView style={[square, ...dayStyles]}>
         <TouchableWithoutFeedback
           onPress={showMessageForDay(today, day, events, startOfThisMonth)}
-          onLongPress={() => { this.setState({ popupVisible: true }); }}
+          onLongPress={this.show.bind(this)}
           hitSlop={expanded}
         >
           <View>
-            <Text
-              style={getTextStyle(getType(today, day, startOfMonth, events))}
-            >
-              {moment(day).date()}
-            </Text>
+            <Text style={textStyles.regular}>{moment(day).date()}</Text>
+            <View style={{ flex: 1, flexDirection: 'row' }}>
+              <Birthday visible={eventForDay.types.includes('birthday')}/>
+              <Morning visible={eventForDay.types.includes('morning')} />
+              <Lunch visible={eventForDay.types.includes('lunch')}/>
+              <Night visible={eventForDay.types.includes('evening')}/>
+            </View>
           </View>
         </TouchableWithoutFeedback>
         <Prompt
           title={day.format('DD MMMM YYYY')}
-          type={this.state.type}
-          onTypeChange={(newType) => {
-            this.setState({ type: newType });
+          types={this.state.types}
+          onTypeChange={(types) => {
+            this.setState({ types });
           }}
-          placeholder="..."
-          defaultValue={getEventForDay(day, events) && getEventForDay(day, events).what}
+          defaultValue={eventForDay.what}
           visible={ this.state.popupVisible }
-          onCancel={() => {
-            this.setState({ popupVisible: false });
-          }}
+          onCancel={this.hide.bind(this)}
           onDelete={() => {
-            this.setState({ popupVisible: false });
-            dispatchDeleteEvent(
-              getEventForDay(day, events) && getEventForDay(day, events).id,
-            );
+            this.hide();
+            dispatchDeleteEvent(eventForDay.id);
           }}
           onSubmit={(value) => {
-            this.setState({ popupVisible: false });
+            this.hide();
             dispatchAddEvent({
+              id: eventForDay.id,
               date: day.format('DD/MM/YYYY'),
-              type: this.state.type,
+              types: this.state.types,
               what: value,
             });
           }}
@@ -281,7 +299,7 @@ const FutureMonth = ({ month }) => {
 
   return (
     <View>
-      <MonthHeader month={month.format('MMMM - YYYY')} />
+      <MonthHeader month={month} />
       <Days days={monthDays} startOfMonth={month} />
     </View>
   );
@@ -289,7 +307,7 @@ const FutureMonth = ({ month }) => {
 
 const Cali = ({ startOfThisMonth, daysInCurrentMonth, remainingMonthsInYear }) => (
   <View style={screen}>
-    <CurrentMonth month={startOfThisMonth} days={daysInCurrentMonth}/>
+    <CurrentMonth month={moment(startOfThisMonth)} days={daysInCurrentMonth}/>
     {
       remainingMonthsInYear.map((month) => (<FutureMonth key={month} month={moment(month)} />))
     }

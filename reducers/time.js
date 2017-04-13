@@ -23,7 +23,7 @@ const updateTimeInfo = () => {
 
   return {
     today: today.format(),
-    startOfThisMonth: today.clone().startOf('month').format('MMMM - YYYY'),
+    startOfThisMonth: today.clone().startOf('month').format(),
     dayOfMonth,
     daysInMonth,
     dayOfWeek,

@@ -24,15 +24,18 @@ export const addEvent = (eventData) => (dispatch) => (
   post(eventsUrl(), eventData)
     .then((response) => response.data)
     .then((createdEvent) => dispatch(eventAdded(createdEvent)))
+    .catch(console.error)
 );
 
 export const getEvents = () => (dispatch) => (
   get(eventsUrl())
-    .then((response) => response.data))
-    .then((events) => dispatch(eventsResetToServer(events)),
+    .then((response) => response.data)
+    .then((events) => dispatch(eventsResetToServer(events)))
+    .catch(console.error)
 );
 
 export const deleteEvent = (id) => (dispatch) => (
   axios.delete(eventUrl(id))
     .then(() => dispatch(eventDeleted(id)))
+    .catch(console.error)
 );

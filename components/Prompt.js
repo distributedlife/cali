@@ -9,29 +9,38 @@ import {
 } from 'react-native';
 import SegmentedControlTab from 'react-native-segmented-control-tab';
 
-const types = ['Busy', 'Leave', 'Morning', 'Lunch', 'Evening'];
+const Types = ['Birthday', 'Leave', 'Morning', 'Lunch', 'Evening'];
 class EventType extends React.Component {
   constructor(props) {
     super(props);
 
-    this.state = {
-      selectedIndex: types.map((t) => t.toLowerCase()).indexOf(props.type.toLowerCase()),
-    };
+    const selectedIndices = props.types
+      .map((type) => type.toLowerCase())
+      .map((type) => Types.map((t) => t.toLowerCase()).indexOf(type));
+
+    this.state = { selectedIndices };
   }
 
   handleIndexChange(index) {
-    this.setState({ selectedIndex: index });
+    let selectedIndices = [];
+    if (this.state.selectedIndices.includes(index)) {
+      selectedIndices = this.state.selectedIndices.filter((i) => i !== index);
+    } else {
+      selectedIndices = this.state.selectedIndices.concat([index]);
+    }
 
-    this.props.onTypeChange(types[index].toLowerCase());
+    this.setState({ selectedIndices });
+    this.props.onTypeChange(selectedIndices.map((i) => Types[i].toLowerCase()));
   }
 
   render() {
     return (
       <SegmentedControlTab
         borderRadius={0}
-        values={types}
+        values={Types}
         tabStyle={{ marginHorizontal: 2, marginTop: 2 }}
-        selectedIndex={this.state.selectedIndex}
+        selectedIndices={this.state.selectedIndices}
+        multiple={true}
         onTabPress={this.handleIndexChange.bind(this)}
       />
     );
@@ -152,8 +161,7 @@ export default class Prompt extends Component {
   _renderDialog() {
     const {
       title,
-      type,
-      placeholder,
+      types,
       defaultValue,
       borderColor,
       promptStyle,
@@ -162,7 +170,6 @@ export default class Prompt extends Component {
       buttonTextStyle,
       submitButtonStyle,
       submitButtonTextStyle,
-      cancelButtonStyle,
       deleteButtonStyle,
       inputStyle,
     } = this.props;
@@ -182,14 +189,14 @@ export default class Prompt extends Component {
             </TouchableHighlight>
           </View>
           <View>
-            <EventType type={type} onTypeChange={this._onTypeChange.bind(this)} />
+            <EventType types={types} onTypeChange={this._onTypeChange.bind(this)} />
           </View>
           <View style={styles.dialogBody}>
             <TextInput
               style={[styles.dialogInput, inputStyle]}
               defaultValue={defaultValue}
               onChangeText={this._onChangeText.bind(this)}
-              placeholder={placeholder}
+              placeholder="..."
               autoFocus={true}
               underlineColorAndroid="white"
               {...this.props.textInputProps} />

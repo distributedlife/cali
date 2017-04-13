@@ -2,7 +2,7 @@ AWSTemplateFormatVersion: '2010-09-09'
 Resources:
   ApiLambda:
     Properties:
-      CodeUri: s3://cali-lambdas/4ef10c6fdb0c49eb86231c6453b76639
+      CodeUri: s3://cali-lambdas/c2860a5eb29ac90bd15ccafbb4130abd
       Environment:
         Variables:
           EVENTS_TABLE_NAME:

@@ -7,7 +7,7 @@ const scan = {
 const getEvents = () => new AWS.DynamoDB.DocumentClient().scan(scan).promise()
   .then((payload) => payload.Items)
   .then((events) => events.reduce((asObj, event) => {
-    asObj[event.date] = { id: event.id, what: event.what, type: event.type };
+    asObj[event.date] = { id: event.id, what: event.what, types: event.types };
     return asObj;
   }, {}));
 

@@ -8,7 +8,7 @@ export default (state = {}, action) => {
       return {
         ...state,
         [action.event.date]: {
-          type: action.event.type,
+          types: action.event.types,
           what: action.event.what,
           id: action.event.id,
         },
