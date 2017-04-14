@@ -133,27 +133,23 @@ const noon = require('../assets/noon.png');
 const night = require('../assets/night.png');
 const birthday = require('../assets/birthday.png');
 
+const icon = {
+  width: 12,
+  height: 12,
+};
 
 const Morning = ({ visible }) => (
-  <Text style={{ fontSize: 8 }}>
-    {visible && <Image style={{ width: 8, height: 8 }} source={morning} /> }
-  </Text>
+  visible ? <Image style={icon} source={morning} /> : null
 );
 
 const Lunch = ({ visible }) => (
-  <Text style={{ fontSize: 8 }}>
-    {visible && <Image style={{ width: 8, height: 8 }} source={noon} /> }
-  </Text>
+  visible ? <Image style={icon} source={noon} /> : null
 );
 const Birthday = ({ visible }) => (
-  <Text style={{ fontSize: 8 }}>
-    {visible && <Image style={{ width: 8, height: 8 }} source={birthday} /> }
-  </Text>
+  visible ? <Image style={icon} source={birthday} /> : null
 );
 const Night = ({ visible }) => (
-  <Text style={{ fontSize: 8 }}>
-    {visible && <Image style={{ width: 8, height: 8 }} source={night} /> }
-  </Text>
+  visible ? <Image style={icon} source={night} /> : null
 );
 
 const expanded = { top: 10, bottom: 10, left: 10, right: 10 };
