@@ -271,7 +271,7 @@ const Days = ({ days, startOfMonth }) => {
     <View style={{ flexDirection: 'column' }}>
     {
       rows.map((daysInRow, i) => (
-        <View style={{ ...row, squareHeight }} key={i}>
+        <View style={{ ...row, height: squareHeight }} key={i}>
         {
           daysInRow.map((day) => (
             <CaliSquare key={moment(day).date()} day={moment(day)} startOfMonth={startOfMonth} />
