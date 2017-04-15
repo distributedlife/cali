@@ -79,6 +79,10 @@ const row = {
 const DaysInWeek = 7;
 const Weekend = [6, 7];
 
+const { width } = Dimensions.get('window');
+const squareHeight = Math.floor(width / 7);
+const imageSize = squareHeight / 4.7;
+
 const getBaseTypes = (today, day, startOfMonth, events) => {
   if (day.isBefore(today)) {
     return 'past';
@@ -93,8 +97,14 @@ const getBaseTypes = (today, day, startOfMonth, events) => {
   if (Weekend.includes(day.isoWeekday())) {
     return 'weekend';
   }
+  if (!event || !event.types) {
+    return 'nothing';
+  }
+  if (event.types.filter((t) => ['morning', 'lunch', 'evening'].includes(t)).length === 0) {
+    return 'nothing';
+  }
 
-  return event ? 'busy' : 'nothing';
+  return 'busy';
 };
 
 const doNothing = () => undefined;
@@ -134,8 +144,8 @@ const night = require('../assets/night.png');
 const birthday = require('../assets/birthday.png');
 
 const icon = {
-  width: 12,
-  height: 12,
+  width: imageSize,
+  height: imageSize,
 };
 
 const Morning = ({ visible }) => (
@@ -257,14 +267,11 @@ const Days = ({ days, startOfMonth }) => {
     days.slice(i * DaysInWeek, (i + 1) * DaysInWeek)),
   );
 
-  const { width } = Dimensions.get('window');
-  const height = Math.floor(width / 7);
-
   return (
     <View style={{ flexDirection: 'column' }}>
     {
       rows.map((daysInRow, i) => (
-        <View style={{ ...row, height }} key={i}>
+        <View style={{ ...row, squareHeight }} key={i}>
         {
           daysInRow.map((day) => (
             <CaliSquare key={moment(day).date()} day={moment(day)} startOfMonth={startOfMonth} />
