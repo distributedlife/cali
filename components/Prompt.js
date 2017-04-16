@@ -10,13 +10,14 @@ import {
 import SegmentedControlTab from 'react-native-segmented-control-tab';
 
 const Types = ['Birthday', 'Leave', 'Morning', 'Lunch', 'Evening'];
+const lTypes = Types.map((t) => t.toLowerCase());
 class EventType extends React.Component {
   constructor(props) {
     super(props);
 
     const selectedIndices = props.types
       .map((type) => type.toLowerCase())
-      .map((type) => Types.map((t) => t.toLowerCase()).indexOf(type));
+      .map((type) => lTypes.indexOf(type));
 
     this.state = { selectedIndices };
   }

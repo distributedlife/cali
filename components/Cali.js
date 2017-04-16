@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import moment from 'moment';
 import Toast from 'react-native-root-toast';
+import isEqual from 'lodash/isEqual';
 import Prompt from './Prompt';
 import SquareView from './Square';
 import { addEvent, deleteEvent } from '../actions/events';
@@ -83,16 +84,13 @@ const { width } = Dimensions.get('window');
 const squareHeight = Math.floor(width / 7);
 const imageSize = squareHeight / 4.7;
 
-const getBaseTypes = (today, day, startOfMonth, events) => {
+const getBaseTypes = (today, day, startOfMonth, event) => {
   if (day.isBefore(today)) {
     return 'past';
   }
   if (day.isBefore(startOfMonth)) {
     return 'padding';
   }
-
-  const dayAsDataFormat = day.format('DD/MM/YYYY');
-  const event = events[dayAsDataFormat];
 
   if (Weekend.includes(day.isoWeekday())) {
     return 'weekend';
@@ -109,7 +107,7 @@ const getBaseTypes = (today, day, startOfMonth, events) => {
 
 const doNothing = () => undefined;
 const getEventForDay = (day, events) => events[day.format('DD/MM/YYYY')];
-const showMessageForDay = (today, day, events, startOfThisMonth) => {
+const showMessageForDay = (today, day, event, startOfThisMonth) => {
   if (day.isBefore(today)) {
     return doNothing;
   }
@@ -117,7 +115,6 @@ const showMessageForDay = (today, day, events, startOfThisMonth) => {
     return doNothing;
   }
 
-  const event = events[day.format('DD/MM/YYYY')];
   if (event && event.what) {
     return (() => Toast.show(event.what));
   }
@@ -164,16 +161,44 @@ const Night = ({ visible }) => (
 
 const expanded = { top: 10, bottom: 10, left: 10, right: 10 };
 
+const ModifyEvent = ({
+  day, types, onTypeChange, event, onCancel, onDelete, onSubmit,
+}) => (
+  <Prompt
+    title={day.format('DD MMMM YYYY')}
+    types={types}
+    onTypeChange={onTypeChange}
+    defaultValue={event.what}
+    visible={true}
+    onCancel={onCancel}
+    onDelete={onDelete}
+    onSubmit={onSubmit}
+  />
+);
+
+const EventIcons = ({ types }) => (
+  <View style={{ flex: 1, flexDirection: 'row' }}>
+    <Birthday visible={types.includes('birthday')}/>
+    <Morning visible={types.includes('morning')} />
+    <Lunch visible={types.includes('lunch')}/>
+    <Night visible={types.includes('evening')}/>
+  </View>
+);
+
 class CaliSquareView extends React.Component {
   constructor(props) {
     super(props);
 
-    const eventForDay = getEventForDay(props.day, props.events) || {};
-
     this.state = {
       popupVisible: false,
-      types: eventForDay.types || [],
+      types: props.event.types || [],
     };
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (!isEqual(this.state.types, nextProps.event.types)) {
+      this.setState({ types: nextProps.event.types || [] });
+    }
   }
 
   show() {
@@ -184,12 +209,38 @@ class CaliSquareView extends React.Component {
     this.setState({ popupVisible: false });
   }
 
+  onTypeChange(types) {
+    this.setState({ types });
+  }
+
+  onDelete() {
+    this.hide();
+    this.props.dispatchDeleteEvent(this.props.event.id);
+  }
+
+  onCancel() {
+    this.hide();
+  }
+
+  onSubmit(value) {
+    this.hide();
+
+    this.props.dispatchAddEvent({
+      id: this.props.event.id,
+      date: this.props.day.format('DD/MM/YYYY'),
+      types: this.state.types,
+      what: value,
+    });
+  }
+
   render() {
     const {
-      today, day, startOfMonth, dispatchAddEvent, events, dispatchDeleteEvent, startOfThisMonth,
+      event,
+      today,
+      day,
+      startOfThisMonth,
+      baseType,
     } = this.props;
-
-    const baseType = getBaseTypes(today, day, startOfMonth, events);
 
     if (baseType === 'past') {
       return (<SquareView style={styles.past} />);
@@ -198,60 +249,48 @@ class CaliSquareView extends React.Component {
       return (<SquareView style={styles.skip} />);
     }
 
-    const eventForDay = getEventForDay(day, events) || {};
-    eventForDay.types = eventForDay.types || [];
     const dayStyles = this.state.types.concat(baseType).map((t) => styles[t]);
 
     return (
       <SquareView style={[square, ...dayStyles]}>
         <TouchableWithoutFeedback
-          onPress={showMessageForDay(today, day, events, startOfThisMonth)}
+          onPress={showMessageForDay(today, day, event, startOfThisMonth)}
           onLongPress={this.show.bind(this)}
           hitSlop={expanded}
         >
           <View>
             <Text style={textStyles.regular}>{moment(day).date()}</Text>
-            <View style={{ flex: 1, flexDirection: 'row' }}>
-              <Birthday visible={eventForDay.types.includes('birthday')}/>
-              <Morning visible={eventForDay.types.includes('morning')} />
-              <Lunch visible={eventForDay.types.includes('lunch')}/>
-              <Night visible={eventForDay.types.includes('evening')}/>
-            </View>
+            <EventIcons types={this.state.types} />
           </View>
         </TouchableWithoutFeedback>
-        <Prompt
-          title={day.format('DD MMMM YYYY')}
-          types={this.state.types}
-          onTypeChange={(types) => {
-            this.setState({ types });
-          }}
-          defaultValue={eventForDay.what}
-          visible={ this.state.popupVisible }
-          onCancel={this.hide.bind(this)}
-          onDelete={() => {
-            this.hide();
-            dispatchDeleteEvent(eventForDay.id);
-          }}
-          onSubmit={(value) => {
-            this.hide();
-            dispatchAddEvent({
-              id: eventForDay.id,
-              date: day.format('DD/MM/YYYY'),
-              types: this.state.types,
-              what: value,
-            });
-          }}
-        />
+        {
+          this.state.popupVisible &&
+          <ModifyEvent
+            day={day}
+            types={this.state.types}
+            onTypeChange={this.onTypeChange.bind(this)}
+            event={event}
+            onCancel={this.onCancel.bind(this)}
+            onDelete={this.onDelete.bind(this)}
+            onSubmit={this.onSubmit.bind(this)}
+          />
+        }
       </SquareView>
     );
   }
 }
 
-const CaliSquare = connect((state) => ({
-  today: state.time.today,
-  startOfThisMonth: state.time.startOfThisMonth,
-  events: state.events,
-}), {
+const CaliSquare = connect((state, ownProps) => {
+  const event = getEventForDay(ownProps.day, state.events) || {};
+
+  return {
+    baseType: getBaseTypes(moment(state.time.today), ownProps.day, ownProps.startOfMonth, event),
+    today: state.time.today,
+    startOfThisMonth: state.time.startOfThisMonth,
+    events: state.events,
+    event,
+  };
+}, {
   dispatchAddEvent: addEvent,
   dispatchDeleteEvent: deleteEvent,
 })(CaliSquareView);
