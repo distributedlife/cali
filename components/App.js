@@ -1,5 +1,5 @@
 import React from 'react';
-import { ScrollView, RefreshControl } from 'react-native';
+import { ScrollView, RefreshControl, AppState } from 'react-native';
 import moment from 'moment';
 import { Provider, connect } from 'react-redux';
 import Cali from './Cali';
@@ -25,6 +25,21 @@ class RefreshableListView extends React.Component {
       this.setState({ refreshing: false });
     });
   }
+
+  handleAppStateChange(nextAppState) {
+    if (nextAppState === 'active') {
+      this.onRefresh();
+    }
+  }
+
+  componentDidMount() {
+    AppState.addEventListener('change', this.handleAppStateChange.bind(this));
+  }
+
+  componentWillUnmount() {
+    AppState.removeEventListener('change', this.handleAppStateChange.bind(this));
+  }
+
 
   render() {
     return (
