@@ -6,6 +6,7 @@ import {
   TouchableWithoutFeedback,
   Dimensions,
   Image,
+  ActivityIndicator,
 } from 'react-native';
 import moment from 'moment';
 import Toast from 'react-native-root-toast';
@@ -200,6 +201,7 @@ class CaliSquareView extends React.Component {
     this.state = {
       popupVisible: false,
       types: props.event.types || [],
+      loading: false,
     };
   }
 
@@ -222,8 +224,11 @@ class CaliSquareView extends React.Component {
   }
 
   onDelete() {
+    this.showSpinner();
     this.hide();
-    this.props.dispatchDeleteEvent(this.props.event.id);
+
+    this.props.dispatchDeleteEvent(this.props.event.id)
+      .then(this.removeSpinner.bind(this));
   }
 
   onCancel() {
@@ -231,6 +236,7 @@ class CaliSquareView extends React.Component {
   }
 
   onSubmit(value) {
+    this.showSpinner();
     this.hide();
 
     this.props.dispatchAddEvent({
@@ -238,7 +244,16 @@ class CaliSquareView extends React.Component {
       date: this.props.day.format('DD/MM/YYYY'),
       types: this.state.types,
       what: value,
-    });
+    })
+    .then(this.removeSpinner.bind(this));
+  }
+
+  showSpinner() {
+    this.setState({ loading: true });
+  }
+
+  removeSpinner() {
+    this.setState({ loading: false });
   }
 
   render() {
@@ -266,13 +281,21 @@ class CaliSquareView extends React.Component {
           onLongPress={this.show.bind(this)}
           hitSlop={expanded}
         >
-          <View>
-            <Text style={textStyles.regular}>{moment(day).date()}</Text>
-            <EventIcons types={this.state.types} />
-          </View>
+          {
+            this.state.loading
+            ?
+              <View />
+            :
+              <View>
+                <Text style={textStyles.regular}>{moment(day).date()}</Text>
+                <EventIcons types={this.state.types} />
+              </View>
+          }
         </TouchableWithoutFeedback>
+        { this.state.loading && <ActivityIndicator /> }
         {
           this.state.popupVisible &&
+          !this.state.loading &&
           <ModifyEvent
             day={day}
             types={this.state.types}
