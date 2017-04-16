@@ -7,7 +7,7 @@
     "devices": "xcrun simctl list devices",
     "simulators": "xcrun simctl list devices",
     "deploy": "cd ios && fastlane beta",
-    "start": "react-native run-ios --simulator 'iPad 2'",
+    "start": "react-native run-ios --simulator 'iPhone 6'",
     "android": "react-native run-android",
     "logs": "react-native log-ios",
     "test": "jest"

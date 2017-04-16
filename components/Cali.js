@@ -133,7 +133,7 @@ const showMessageForDay = (today, day, event, startOfThisMonth) => {
 const screen = {
   justifyContent: 'center',
   flexDirection: 'column',
-  top: 20,
+  marginVertical: 20,
   alignItems: 'center',
 };
 
