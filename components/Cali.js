@@ -14,6 +14,10 @@ import Prompt from './Prompt';
 import SquareView from './Square';
 import { addEvent, deleteEvent } from '../actions/events';
 
+const { width } = Dimensions.get('window');
+const squareHeight = Math.floor(width / 7);
+const imageSize = squareHeight / 4.7;
+
 const square = {
   flex: 1,
   margin: 2,
@@ -26,7 +30,7 @@ const square = {
 const colours = {
   busy: 'orange',
   leave: 'green',
-  birthday: 'red',
+  today: 'red',
 };
 
 const styles = {
@@ -49,6 +53,11 @@ const styles = {
   weekend: {
     borderColor: colours.leave,
     borderWidth: 2,
+  },
+  today: {
+    borderColor: colours.today,
+    borderWidth: 2,
+    borderRadius: 8,
   },
   morning: {
     backgroundColor: colours.busy,
@@ -80,10 +89,6 @@ const row = {
 const DaysInWeek = 7;
 const Weekend = [6, 7];
 
-const { width } = Dimensions.get('window');
-const squareHeight = Math.floor(width / 7);
-const imageSize = squareHeight / 4.7;
-
 const getBaseTypes = (today, day, startOfMonth, event) => {
   if (day.isBefore(today)) {
     return 'past';
@@ -92,6 +97,9 @@ const getBaseTypes = (today, day, startOfMonth, event) => {
     return 'padding';
   }
 
+  if (day.isSame(today, 'day')) {
+    return 'today';
+  }
   if (Weekend.includes(day.isoWeekday())) {
     return 'weekend';
   }
