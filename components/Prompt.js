@@ -126,8 +126,9 @@ export default class Prompt extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const { visible, defaultValue } = nextProps;
-    this.setState({ visible, value: defaultValue });
+    const { visible } = nextProps;
+
+    this.setState({ visible });
   }
 
   _onChangeText(value) {
@@ -140,6 +141,7 @@ export default class Prompt extends Component {
 
   _onSubmitPress() {
     const { value } = this.state;
+
     this.props.onSubmit(value);
   }
 
