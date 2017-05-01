@@ -267,6 +267,7 @@ class CaliSquareView extends React.Component {
       startOfThisMonth,
       baseType,
       filtered,
+      filterTypes,
     } = this.props;
 
     if (baseType === 'past') {
@@ -278,6 +279,8 @@ class CaliSquareView extends React.Component {
 
     const dayStyles = this.state.types.concat(baseType).map((t) => styles[t]);
     const filteredStyle = filtered ? styles.filteredStyle : {};
+
+    const types = this.state.types && this.state.types.length > 0 ? this.state.types : filterTypes;
 
     return (
       <SquareView style={[square, dayStyles, filteredStyle]}>
@@ -303,7 +306,7 @@ class CaliSquareView extends React.Component {
           !this.state.loading &&
           <ModifyEvent
             day={day}
-            types={this.state.types}
+            types={types}
             onTypeChange={this.onTypeChange.bind(this)}
             event={event}
             onCancel={this.onCancel.bind(this)}
@@ -331,6 +334,7 @@ const CaliSquare = connect((state, ownProps) => {
     events: state.events,
     event,
     filtered,
+    filterTypes,
   };
 }, {
   dispatchAddEvent: addEvent,
