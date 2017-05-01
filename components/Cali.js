@@ -70,6 +70,9 @@ const styles = {
     backgroundColor: colours.busy,
   },
   birthday: {},
+  filteredStyle: {
+    opacity: 0.3,
+  },
 };
 
 const textStyles = {
@@ -263,6 +266,7 @@ class CaliSquareView extends React.Component {
       day,
       startOfThisMonth,
       baseType,
+      filtered,
     } = this.props;
 
     if (baseType === 'past') {
@@ -273,9 +277,10 @@ class CaliSquareView extends React.Component {
     }
 
     const dayStyles = this.state.types.concat(baseType).map((t) => styles[t]);
+    const filteredStyle = filtered ? styles.filteredStyle : {};
 
     return (
-      <SquareView style={[square, ...dayStyles]}>
+      <SquareView style={[square, dayStyles, filteredStyle]}>
         <TouchableWithoutFeedback
           onPress={showMessageForDay(today, day, event, startOfThisMonth)}
           onLongPress={this.show.bind(this)}
@@ -314,12 +319,18 @@ class CaliSquareView extends React.Component {
 const CaliSquare = connect((state, ownProps) => {
   const event = getEventForDay(ownProps.day, state.events) || {};
 
+  const eventTypes = event.types || [];
+  const { filterTypes } = ownProps;
+  const isInFilterType = (type) => filterTypes.includes(type);
+  const filtered = eventTypes.filter(isInFilterType).length === 0 && filterTypes.length > 0;
+
   return {
     baseType: getBaseTypes(moment(state.time.today), ownProps.day, ownProps.startOfMonth, event),
     today: state.time.today,
     startOfThisMonth: state.time.startOfThisMonth,
     events: state.events,
     event,
+    filtered,
   };
 }, {
   dispatchAddEvent: addEvent,
@@ -327,7 +338,7 @@ const CaliSquare = connect((state, ownProps) => {
 })(CaliSquareView);
 
 
-const Days = ({ days, startOfMonth }) => {
+const Days = ({ days, startOfMonth, filterTypes }) => {
   const numberOfRows = Math.floor(days.length / DaysInWeek) + (
     days.length % DaysInWeek > 0
     ? 1
@@ -344,7 +355,12 @@ const Days = ({ days, startOfMonth }) => {
         <View style={{ ...row, height: squareHeight }} key={i}>
         {
           daysInRow.map((day) => (
-            <CaliSquare key={moment(day).date()} day={moment(day)} startOfMonth={startOfMonth} />
+            <CaliSquare
+              key={moment(day).date()}
+              day={moment(day)}
+              startOfMonth={startOfMonth}
+              filterTypes={filterTypes}
+            />
           ))
         }
         </View>
@@ -354,14 +370,14 @@ const Days = ({ days, startOfMonth }) => {
   );
 };
 
-const CurrentMonth = ({ month, days }) => (
+const CurrentMonth = ({ month, days, filterTypes }) => (
   <View>
     <MonthHeader month={month} />
-    <Days days={days} startOfMonth={month} />
+    <Days days={days} startOfMonth={month} filterTypes={filterTypes} />
   </View>
 );
 
-const FutureMonth = ({ month }) => {
+const FutureMonth = ({ month, filterTypes }) => {
   const monthDays = Array(month.daysInMonth()).fill(0).map((x, i) => (
     month.clone().add(i, 'days')),
   );
@@ -373,16 +389,22 @@ const FutureMonth = ({ month }) => {
   return (
     <View>
       <MonthHeader month={month} />
-      <Days days={monthDays} startOfMonth={month} />
+      <Days days={monthDays} startOfMonth={month} filterTypes={filterTypes} />
     </View>
   );
 };
 
-const Cali = ({ startOfThisMonth, daysInCurrentMonth, remainingMonthsInYear }) => (
+const Cali = ({ startOfThisMonth, daysInCurrentMonth, remainingMonthsInYear, filterTypes }) => (
   <View style={screen}>
-    <CurrentMonth month={moment(startOfThisMonth)} days={daysInCurrentMonth}/>
+    <CurrentMonth
+      month={moment(startOfThisMonth)}
+      days={daysInCurrentMonth}
+      filterTypes={filterTypes}
+    />
     {
-      remainingMonthsInYear.map((month) => (<FutureMonth key={month} month={moment(month)} />))
+      remainingMonthsInYear.map((month) => (
+        <FutureMonth key={month} month={moment(month)} filterTypes={filterTypes} />
+      ))
     }
   </View>
 );

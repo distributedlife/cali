@@ -7,46 +7,7 @@ import {
   View,
   StyleSheet,
 } from 'react-native';
-import SegmentedControlTab from 'react-native-segmented-control-tab';
-
-const Types = ['Birthday', 'Leave', 'Morning', 'Lunch', 'Evening'];
-const lTypes = Types.map((t) => t.toLowerCase());
-class EventType extends React.Component {
-  constructor(props) {
-    super(props);
-
-    const selectedIndices = props.types
-      .map((type) => type.toLowerCase())
-      .map((type) => lTypes.indexOf(type));
-
-    this.state = { selectedIndices };
-  }
-
-  handleIndexChange(index) {
-    let selectedIndices = [];
-    if (this.state.selectedIndices.includes(index)) {
-      selectedIndices = this.state.selectedIndices.filter((i) => i !== index);
-    } else {
-      selectedIndices = this.state.selectedIndices.concat([index]);
-    }
-
-    this.setState({ selectedIndices });
-    this.props.onTypeChange(selectedIndices.map((i) => Types[i].toLowerCase()));
-  }
-
-  render() {
-    return (
-      <SegmentedControlTab
-        borderRadius={0}
-        values={Types}
-        tabStyle={{ marginHorizontal: 2, marginTop: 2 }}
-        selectedIndices={this.state.selectedIndices}
-        multiple={true}
-        onTabPress={this.handleIndexChange.bind(this)}
-      />
-    );
-  }
-}
+import EventTypeSelector from './EventTypeSelector';
 
 const styles = StyleSheet.create({
   dialog: {
@@ -192,7 +153,7 @@ export default class Prompt extends Component {
             </TouchableHighlight>
           </View>
           <View>
-            <EventType types={types} onTypeChange={this._onTypeChange.bind(this)} />
+            <EventTypeSelector types={types} onTypeChange={this._onTypeChange.bind(this)} />
           </View>
           <View style={styles.dialogBody}>
             <TextInput
