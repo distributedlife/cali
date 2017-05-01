@@ -34,6 +34,8 @@ class RefreshableListView extends React.Component {
 
   componentDidMount() {
     AppState.addEventListener('change', this.handleAppStateChange.bind(this));
+
+    this.onRefresh();
   }
 
   componentWillUnmount() {
