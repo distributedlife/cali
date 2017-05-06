@@ -1,8 +1,10 @@
-import moment from 'moment';
+import moment from 'moment-timezone';
 import { EVENT_ADDED, EVENTS_RESET_TO_SERVER, EVENT_DELETED } from '../actions';
 
 const updateTimeInfo = () => {
-  const today = moment().startOf('day');
+  const timeZone = moment.tz.guess();
+
+  const today = moment().tz(timeZone).startOf('day');
   const daysInMonth = today.daysInMonth();
   const dayOfMonth = today.date();
   const daysLeft = daysInMonth - dayOfMonth;
