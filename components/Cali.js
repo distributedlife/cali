@@ -66,7 +66,7 @@ const styles = {
   lunch: {
     backgroundColor: colours.busy,
   },
-  night: {
+  evening: {
     backgroundColor: colours.busy,
   },
   birthday: {},
