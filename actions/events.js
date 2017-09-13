@@ -16,9 +16,9 @@ const eventsResetToServer = (events) => ({
   events,
 });
 
-const base = 'https://on8dujthlh.execute-api.ap-southeast-2.amazonaws.com/Prod';
-const eventsUrl = () => `${base}/api/events`;
-const eventUrl = (id) => `${base}/api/event/${id}`;
+const base = 'https://api.cali-prd.com';
+const eventsUrl = () => `${base}/events`;
+const eventUrl = (id) => `${base}/event/${id}`;
 
 export const addEvent = (eventData) => (dispatch) => (
   post(eventsUrl(), eventData)
