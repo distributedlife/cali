@@ -24,19 +24,19 @@ const deExpressYourself = (req) => ({
   data: req.body,
 });
 
-app.post('/api/events', (req, res) => (
+app.post('/events', (req, res) => (
   addEvent(deExpressYourself(req))
     .then((data) => res.json(data))
     .catch((err) => res.sendStatus(getCode(err)))
 ));
 
-app.get('/api/events', (req, res) => (
+app.get('/events', (req, res) => (
   getEvents()
     .then((data) => res.json(data))
     .catch((err) => res.sendStatus(getCode(err)))
 ));
 
-app.delete('/api/event/:id', (req, res) => (
+app.delete('/event/:id', (req, res) => (
   deleteEvent(req.params.id)
     .then(() => res.sendStatus(200))
     .catch((err) => res.sendStatus(getCode(err)))

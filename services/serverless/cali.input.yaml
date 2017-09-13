@@ -7,23 +7,113 @@ Resources:
       PrimaryKey:
         Name: id
         Type: String
+  CaliApiLambdaRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          -
+            Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+                - apigateway.amazonaws.com
+            Action: "sts:AssumeRole"
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+        - "arn:aws:iam::aws:policy/service-role/AWSLambdaRole"
+        - "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
+      Policies:
+        -
+          PolicyName: AllowXRay
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              -
+                Effect: Allow
+                Action:
+                  - "xray:PutTraceSegments"
+                  - "xray:PutTelemetryRecords"
+                Resource: "*"
   ApiLambda:
     Type: AWS::Serverless::Function
     Properties:
       Handler: src/lambdas/api/lambda.handler
-      Runtime: nodejs4.3
-      Timeout: 10
-      Policies:
-        - AWSLambdaRole
-        - AWSLambdaBasicExecutionRole
-        - AmazonDynamoDBFullAccess
+      Runtime: nodejs6.10
+      Timeout: 30
+      MemorySize: 512
+      Role: !GetAtt CaliApiLambdaRole.Arn
       Environment:
         Variables:
           REGION: !Ref "AWS::Region"
           EVENTS_TABLE_NAME: !Ref EventsTable
-      Events:
-        ProxyApiGreedy:
-          Type: Api
-          Properties:
-            Path: /api/{proxy+}
-            Method: ANY
+  CaliApiGateway:
+    Type: "AWS::ApiGateway::RestApi"
+    Properties:
+      Name: cali-api
+  CaliApiDeployment:
+    Type: "AWS::ApiGateway::Deployment"
+    Properties:
+      RestApiId: !Ref CaliApiGateway
+      StageName: api
+      StageDescription:
+        MetricsEnabled: true
+        LoggingLevel: ERROR
+        DataTraceEnabled: false
+        CacheDataEncrypted: false
+        CacheTtlInSeconds: 300
+        CachingEnabled: true
+        CacheClusterEnabled: true
+        CacheClusterSize: 0.5
+    DependsOn:
+      - CaliApiGatewayResourceGet
+  CaliApiGatewayResource:
+    Type: "AWS::ApiGateway::Resource"
+    Properties:
+      RestApiId: !Ref CaliApiGateway
+      ParentId:
+        Fn::GetAtt:
+          - "CaliApiGateway"
+          - "RootResourceId"
+      PathPart: "{proxy+}"
+    DependsOn:
+      - CaliApiGateway
+  CaliApiGatewayResourceGet:
+    Type: "AWS::ApiGateway::Method"
+    DependsOn:
+      - CaliApiGatewayResource
+    Properties:
+      AuthorizationType: NONE
+      HttpMethod: ANY
+      Integration:
+        Type: AWS_PROXY
+        Credentials: !GetAtt CaliApiLambdaRole.Arn
+        CacheKeyParameters:
+          - method.request.path.proxy
+        IntegrationHttpMethod: POST
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ApiLambda.Arn}/invocations"
+      RequestParameters:
+        method.request.path.proxy: true
+      ResourceId: !Ref CaliApiGatewayResource
+      RestApiId: !Ref CaliApiGateway
+  CaliPrdDomain:
+    Type: AWS::ApiGateway::DomainName
+    Properties:
+      CertificateArn: arn:aws:acm:us-east-1:327070154264:certificate/48d688ef-9190-4a01-aa64-4f05fd2d692e
+      DomainName: api.cali-prd.com
+  ApiGatewayBasePathMapping:
+    Type: AWS::ApiGateway::BasePathMapping
+    Properties:
+      DomainName: !Ref CaliPrdDomain
+      RestApiId: !Ref CaliApiGateway
+      Stage: api
+  CaliPrdDomainARecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      AliasTarget:
+        DNSName: d2fw6z2m3ncaba.cloudfront.net
+        HostedZoneId: Z2FDTNDATAQYW2
+      HostedZoneName: cali-prd.com.
+      Name: api.cali-prd.com.
+      Type: A
