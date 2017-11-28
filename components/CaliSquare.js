@@ -1,19 +1,25 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import {
-  Text,
-  View,
-  TouchableWithoutFeedback,
-  Dimensions,
-  Image,
-  ActivityIndicator,
-} from 'react-native';
 import moment from 'moment';
-import Toast from 'react-native-root-toast';
 import isEqual from 'lodash/isEqual';
-import Prompt from './Prompt';
+import {
+  Text, View, TouchableWithoutFeedback, ActivityIndicator, Image, Dimensions,
+} from 'react-native';
+import Toast from 'react-native-root-toast';
 import SquareView from './Square';
 import { addEvent, deleteEvent } from '../actions/events';
+import Prompt from './Prompt';
+
+const Weekend = [6, 7];
+
+const textStyles = {
+  regular: {
+    color: 'black',
+    marginVertical: 4,
+    height: 20,
+    textAlign: 'center',
+  },
+};
 
 const { width } = Dimensions.get('window');
 const squareHeight = Math.floor(width / 7);
@@ -27,6 +33,7 @@ const square = {
   borderStyle: 'solid',
   borderWidth: 1,
 };
+
 
 const colours = {
   busy: 'orange',
@@ -75,23 +82,7 @@ const styles = {
   },
 };
 
-const textStyles = {
-  regular: {
-    color: 'black',
-    marginVertical: 4,
-    height: 20,
-    textAlign: 'center',
-  },
-};
-
-const row = {
-  height: 40,
-  flexDirection: 'row',
-  flexWrap: 'wrap',
-};
-
-const DaysInWeek = 7;
-const Weekend = [6, 7];
+const expanded = { top: 10, bottom: 10, left: 10, right: 10 };
 
 const getBaseTypes = (today, day, startOfMonth, event) => {
   if (day.isBefore(today)) {
@@ -117,6 +108,7 @@ const getBaseTypes = (today, day, startOfMonth, event) => {
   return 'busy';
 };
 
+
 const doNothing = () => undefined;
 const getEventForDay = (day, events) => events[day.format('DD/MM/YYYY')];
 const showMessageForDay = (today, day, event, startOfThisMonth) => {
@@ -134,18 +126,6 @@ const showMessageForDay = (today, day, event, startOfThisMonth) => {
   return doNothing;
 };
 
-const screen = {
-  justifyContent: 'center',
-  flexDirection: 'column',
-  marginVertical: 20,
-  alignItems: 'center',
-};
-
-const MonthHeader = ({ month }) => (
-  <View>
-    <Text style={{ textAlign: 'center' }}>{month.format('MMMM - YYYY')}</Text>
-  </View>
-);
 
 const morning = require('../assets/morning.png');
 const noon = require('../assets/noon.png');
@@ -160,7 +140,6 @@ const icon = {
 const Morning = ({ visible }) => (
   visible ? <Image style={icon} source={morning} /> : null
 );
-
 const Lunch = ({ visible }) => (
   visible ? <Image style={icon} source={noon} /> : null
 );
@@ -171,7 +150,6 @@ const Night = ({ visible }) => (
   visible ? <Image style={icon} source={night} /> : null
 );
 
-const expanded = { top: 10, bottom: 10, left: 10, right: 10 };
 
 const ModifyEvent = ({
   day, types, onTypeChange, event, onCancel, onDelete, onSubmit,
@@ -190,10 +168,10 @@ const ModifyEvent = ({
 
 const EventIcons = ({ types }) => (
   <View style={{ flex: 1, flexDirection: 'row' }}>
-    <Note visible={types.includes('note')}/>
     <Morning visible={types.includes('morning')} />
     <Lunch visible={types.includes('lunch')}/>
     <Night visible={types.includes('evening')}/>
+    <Note visible={types.includes('note')}/>
   </View>
 );
 
@@ -206,6 +184,12 @@ class CaliSquareView extends React.Component {
       types: props.event.types || [],
       loading: false,
     };
+
+    this.show = this.show.bind(this);
+    this.onTypeChange = this.onTypeChange.bind(this);
+    this.onCancel = this.onCancel.bind(this);
+    this.onDelete = this.onDelete.bind(this);
+    this.onSubmit = this.onSubmit.bind(this);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -286,7 +270,7 @@ class CaliSquareView extends React.Component {
       <SquareView style={[square, dayStyles, filteredStyle]}>
         <TouchableWithoutFeedback
           onPress={showMessageForDay(today, day, event, startOfThisMonth)}
-          onLongPress={this.show.bind(this)}
+          onLongPress={this.show}
           hitSlop={expanded}
         >
           {
@@ -307,11 +291,11 @@ class CaliSquareView extends React.Component {
           <ModifyEvent
             day={day}
             types={types}
-            onTypeChange={this.onTypeChange.bind(this)}
+            onTypeChange={this.onTypeChange}
             event={event}
-            onCancel={this.onCancel.bind(this)}
-            onDelete={this.onDelete.bind(this)}
-            onSubmit={this.onSubmit.bind(this)}
+            onCancel={this.onCancel}
+            onDelete={this.onDelete}
+            onSubmit={this.onSubmit}
           />
         }
       </SquareView>
@@ -341,80 +325,4 @@ const CaliSquare = connect((state, ownProps) => {
   dispatchDeleteEvent: deleteEvent,
 })(CaliSquareView);
 
-
-const Days = ({ days, startOfMonth, filterTypes }) => {
-  const numberOfRows = Math.floor(days.length / DaysInWeek) + (
-    days.length % DaysInWeek > 0
-    ? 1
-    : 0
-  );
-  const rows = Array(numberOfRows).fill(0).map((x, i) => (
-    days.slice(i * DaysInWeek, (i + 1) * DaysInWeek)),
-  );
-
-  return (
-    <View style={{ flexDirection: 'column' }}>
-    {
-      rows.map((daysInRow, i) => (
-        <View style={{ ...row, height: squareHeight }} key={startOfMonth.valueOf() + i}>
-        {
-          daysInRow.map((day) => (
-            <CaliSquare
-              key={moment(day).date()}
-              day={moment(day)}
-              startOfMonth={startOfMonth}
-              filterTypes={filterTypes}
-            />
-          ))
-        }
-        </View>
-      ))
-    }
-    </View>
-  );
-};
-
-const CurrentMonth = ({ month, days, filterTypes }) => (
-  <View>
-    <MonthHeader month={month} />
-    <Days days={days} startOfMonth={month} filterTypes={filterTypes} />
-  </View>
-);
-
-const FutureMonth = ({ month, filterTypes }) => {
-  const monthDays = Array(month.daysInMonth()).fill(0).map((x, i) => (
-    month.clone().add(i, 'days')),
-  );
-
-  Array(month.isoWeekday() - 1).fill(0).forEach((x, i) => (
-    monthDays.unshift(month.clone().subtract(i + 1, 'days'))),
-  );
-
-  return (
-    <View>
-      <MonthHeader month={month} />
-      <Days days={monthDays} startOfMonth={month} filterTypes={filterTypes} />
-    </View>
-  );
-};
-
-const Cali = ({ startOfThisMonth, daysInCurrentMonth, remainingMonthsInYear, filterTypes }) => (
-  <View style={screen}>
-    <CurrentMonth
-      month={moment(startOfThisMonth)}
-      days={daysInCurrentMonth}
-      filterTypes={filterTypes}
-    />
-    {
-      remainingMonthsInYear.map((month) => (
-        <FutureMonth key={month} month={moment(month)} filterTypes={filterTypes} />
-      ))
-    }
-  </View>
-);
-
-export default connect((state) => ({
-  startOfThisMonth: state.time.startOfThisMonth,
-  daysInCurrentMonth: state.time.daysInCurrentMonth,
-  remainingMonthsInYear: state.time.remainingMonthsInYear,
-}))(Cali);
+export default CaliSquare;

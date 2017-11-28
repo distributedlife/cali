@@ -19,7 +19,7 @@ const updateTimeInfo = () => {
   ));
 
   const thisMonth = today.month();
-  const remainingMonthsInYear = Array(12).fill(0).map((x, i) => (
+  const remainingMonthsInYear = Array(2).fill(0).map((x, i) => (
     today.clone().add(i + 1, 'months').startOf('month')).format(),
   );
 

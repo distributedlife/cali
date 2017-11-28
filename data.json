@@ -2,7 +2,7 @@
   "04/04/2017": { "type": "busy", "what": "Games with James"  },
   "10/04/2017": { "type": "optional", "what": "Chinese Grand Prix" },
   "17/04/2017": { "type": "optional", "what": "Bahrain Grand Prix" },
-  "23/04/2017": { "type": "birthday", "what": "Jess & Dan N", "frequency": "yearly" },
+  "23/04/2017": { "type": "note", "what": "Jess & Dan N", "frequency": "yearly" },
   "01/05/2017": { "type": "optional", "what": "Russian Grand Prix" },
   "15/05/2017": { "type": "optional", "what": "Spanish Grand Prix" },
   "29/05/2017": { "type": "optional", "what": "Monaco Grand Prix" },
@@ -20,6 +20,6 @@
   "30/10/2017": { "type": "optional", "what": "Mexican Grand Prix" },
   "13/11/2017": { "type": "optional", "what": "Brazilian Grand Prix" },
   "27/11/2017": { "type": "optional", "what": "Abu Dhabi Grand Prix" },
-  "17/03/2018": { "type": "birthday", "what": "Adrian", "frequency": "yearly" },
-  "29/03/2018": { "type": "birthday", "what": "Lucy", "frequency": "yearly" }
+  "17/03/2018": { "type": "note", "what": "Adrian", "frequency": "yearly" },
+  "29/03/2018": { "type": "note", "what": "Lucy", "frequency": "yearly" }
 }
